@@ -13,7 +13,7 @@ import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
-private object BatteryApiPigeonUtils {
+private object NativeApisPigeonUtils {
 
   fun wrapResult(result: Any?): List<Any?> {
     return listOf(result)
@@ -47,7 +47,7 @@ class FlutterError (
   override val message: String? = null,
   val details: Any? = null
 ) : Throwable()
-private open class BatteryApiPigeonCodec : StandardMessageCodec() {
+private open class NativeApisPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return     super.readValueOfType(type, buffer)
   }
@@ -63,7 +63,7 @@ interface BatteryApi {
   companion object {
     /** The codec used by BatteryApi. */
     val codec: MessageCodec<Any?> by lazy {
-      BatteryApiPigeonCodec()
+      NativeApisPigeonCodec()
     }
     /** Sets up an instance of `BatteryApi` to handle messages through the `binaryMessenger`. */
     @JvmOverloads
@@ -76,7 +76,38 @@ interface BatteryApi {
             val wrapped: List<Any?> = try {
               listOf(api.getBatteryLevel())
             } catch (exception: Throwable) {
-              BatteryApiPigeonUtils.wrapError(exception)
+              NativeApisPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface StepCounterApi {
+  fun getTotalSteps(): Long
+
+  companion object {
+    /** The codec used by StepCounterApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      NativeApisPigeonCodec()
+    }
+    /** Sets up an instance of `StepCounterApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: StepCounterApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.battery_pigeon_demo.StepCounterApi.getTotalSteps$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getTotalSteps())
+            } catch (exception: Throwable) {
+              NativeApisPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
           }
